@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Sierpinski Triangle</title>
+  </head>
+  <body>
+    <canvas id="canvas" width="1000" height="1000"></canvas>
+    <button onclick="downloadCanvasContents()">Download Generated Sierpinski Triangle</button>
+
+    <!-- JavaScript Code Here -->
+    <script>
+      const c = document.getElementById('canvas');
+      const ctx = c.getContext('2d'); // context variable is used to draw on a 2D plane
+
+      const createTriangle = (pos, sidelen) => {
+        ctx.beginPath();
+        ctx.moveTo(...pos); // go to left vertex
+
+        // note that (0,0) in canvas is the top left, so 'up' on the vertical component would use substraction.
+        ctx.lineTo(pos[0] + sidelen / 2, pos[1] - sidelen * Math.sin(Math.PI / 3)); // draw line from left vertex to top vertex
+        ctx.lineTo(pos[0] + sidelen, pos[1]); // draw line from top vertex to right vertex
+        ctx.lineTo(...pos); // draw line from right vertex back to left vertex
+        ctx.closePath();
+        ctx.fill(); // fill triangle
+      };
+      const createSierpinskiTriangle = (pos, sidelen, depth) => {
+        const innerTriangleSidelen = sidelen / 2; // side length of inner triangles is half the side length of the outer triangle
+        const innerTrianglesPositions = [
+          pos,
+          [pos[0] + innerTriangleSidelen, pos[1]],
+          [pos[0] + innerTriangleSidelen / 2, pos[1] - Math.sin(Math.PI / 3) * innerTriangleSidelen],
+        ]; // these positions are the same as what was used in the createTriangle function
+        if (depth === 0) {
+          innerTrianglesPositions.forEach((trianglePosition) => {
+            createTriangle(trianglePosition, innerTriangleSidelen);
+          });
+        } else {
+          innerTrianglesPositions.forEach((trianglePosition) => {
+            createSierpinskiTriangle(trianglePosition, innerTriangleSidelen, depth - 1);
+          });
+        }
+      };
+      createSierpinskiTriangle([0, 1000], 1000, 6);
+
+      const downloadCanvasContents = () => {
+        const link = document.createElement('a'); // create link element
+        link.download = 'Sierpinski Triangle.png'; // set download attribute
+        link.href = c.toDataURL(); // set the link's URL to the data URL to be downloaded
+        link.click(); // click the element and download on the user's browser
+      };
+    </script>
+  </body>
+</html>
